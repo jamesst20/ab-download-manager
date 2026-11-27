@@ -13,6 +13,7 @@ internal interface FoundationLibrary : Library {
     fun objc_msgSend(receiver: Pointer, selector: Pointer, i: Int): Pointer
     fun objc_msgSend(receiver: Pointer, selector: Pointer, l: Long): Pointer
     fun objc_msgSend(receiver: Pointer, selector: Pointer, p: Pointer): Pointer
+    fun objc_msgSend(receiver: Pointer, selector: Pointer, p: Pointer, l: Long): Pointer
     fun objc_msgSend(receiver: Pointer, selector: Pointer, p1: Pointer, p2: Pointer): Pointer
     fun objc_msgSend(receiver: Pointer, selector: Pointer, o: Any): Pointer
 

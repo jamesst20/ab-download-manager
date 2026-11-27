@@ -93,13 +93,14 @@ class DesktopSettingsComponent(
                         )
                     ),
                     ConfigurableGroup(
-                        nestedConfigurable = listOf(
+                        nestedConfigurable = listOfNotNull(
                             CommonSettings.autoStartConfig(appSettings),
                             if (Platform.isMac()) {
                                 DesktopSettings.appIcon(appSettings, scope)
                             } else {
                                 DesktopSettings.useSystemTray(appSettings)
                             },
+                            DesktopSettings.showSpeedOnDockIconConfig(appSettings),
                         )
                     ),
                     ConfigurableGroup(

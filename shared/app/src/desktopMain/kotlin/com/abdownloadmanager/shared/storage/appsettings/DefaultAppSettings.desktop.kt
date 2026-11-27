@@ -9,4 +9,5 @@ actual object PlatformDefaultSettings : DefaultAppSettings() {
 
     // null keeps the behavior users had before dock visibility was configurable
     val showDockIcon: Boolean? get() = null
+    val showSpeedOnDockIcon: Boolean get() = true
 }

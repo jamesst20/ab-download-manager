@@ -38,6 +38,7 @@ import com.abdownloadmanager.desktop.ui.configurable.platform.PlatformConfigurab
 import com.abdownloadmanager.desktop.ui.widget.ShowMessageDialogs
 import com.abdownloadmanager.desktop.ui.widget.Tray
 import com.abdownloadmanager.desktop.utils.AppInfo
+import com.abdownloadmanager.desktop.utils.DockSpeedIconRenderer
 import com.abdownloadmanager.desktop.utils.FinderProgressTracker
 import com.abdownloadmanager.desktop.utils.GlobalAppExceptionHandler
 import com.abdownloadmanager.desktop.utils.ProvideGlobalExceptionHandler
@@ -51,6 +52,8 @@ import com.abdownloadmanager.shared.ui.widget.NotificationManager
 import com.abdownloadmanager.shared.ui.widget.ProvideLanguageManager
 import com.abdownloadmanager.shared.ui.widget.ProvideNotificationManager
 import com.abdownloadmanager.shared.ui.widget.useNotification
+import com.abdownloadmanager.shared.util.LocalSpeedUnit
+import com.abdownloadmanager.shared.util.convertPositiveBytesToHumanReadable
 import com.abdownloadmanager.shared.util.mvi.HandleEffects
 import com.abdownloadmanager.shared.util.ui.ProvideDebugInfo
 import com.abdownloadmanager.shared.util.ui.icon.MyIcons
@@ -61,6 +64,8 @@ import ir.amirab.util.desktop.mac.event.MacEventHandler
 import ir.amirab.util.platform.Platform
 import ir.amirab.util.platform.isMac
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.koin.core.component.KoinComponent
@@ -119,6 +124,7 @@ object Ui : KoinComponent {
                 HandleEffectsForApp(appComponent)
                 SystemTray(appComponent)
                 FinderProgressIntegration(appComponent)
+                DockSpeedIntegration(appComponent)
 
                 HomeWindow(appComponent)
                 SettingWindow(appComponent)
@@ -207,6 +213,39 @@ private fun HandleEffectsForApp(appComponent: AppComponent) {
                     }
                 }
             }
+        }
+    }
+}
+
+@OptIn(FlowPreview::class)
+@Composable
+private fun DockSpeedIntegration(
+    component: AppComponent,
+) {
+    if (!Platform.isMac()) return
+
+    val speedUnit = LocalSpeedUnit.current
+    val showSpeedOnDockIcon by component.showSpeedOnDockIcon.collectAsState()
+    LaunchedEffect(showSpeedOnDockIcon, speedUnit) {
+        if (!showSpeedOnDockIcon) {
+            PlatformDockToggler.setIcon(null)
+            return@LaunchedEffect
+        }
+
+        var lastLabel: String? = null
+        try {
+            component.globalSpeedFlow.sample(1.seconds).collect { speed ->
+                val label = speed.takeIf { it > 0 }?.let {
+                    convertPositiveBytesToHumanReadable(it, speedUnit, asCompactAsPossible = true)
+                        ?.plus("/s")
+                }
+                if (label != lastLabel) {
+                    lastLabel = label
+                    PlatformDockToggler.setIcon(label?.let(DockSpeedIconRenderer::render))
+                }
+            }
+        } finally {
+            PlatformDockToggler.setIcon(null)
         }
     }
 }

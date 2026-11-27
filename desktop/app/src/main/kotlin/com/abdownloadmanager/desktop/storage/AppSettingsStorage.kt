@@ -57,6 +57,7 @@ class AppSettingsStorage(
     override val useRelativeDateTime = from(AppSettingsModel.useRelativeDateTime)
     val useSystemTray = from(AppSettingsModel.useSystemTray)
     val showDockIcon = from(AppSettingsModel.showDockIcon)
+    val showSpeedOnDockIcon = from(AppSettingsModel.showSpeedOnDockIcon)
     override val threadCount = from(AppSettingsModel.threadCount)
     override val maxConcurrentDownloads = from(AppSettingsModel.maxConcurrentDownloads)
     override val dynamicPartCreation = from(AppSettingsModel.dynamicPartCreation)
